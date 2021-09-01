@@ -4,6 +4,10 @@ const bcrypt = require("bcryptjs");
 
 userSchema = new mongoose.Schema(
   {
+    loginId: {
+      type: String,
+      default: null
+  },
     name: {
       type: String,
       required: [true, "Please tell us your name"],
@@ -17,7 +21,6 @@ userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Please provide password"],
       minLength: [8, "Password should have minimum 8 letters"],
       select: false,
     },
