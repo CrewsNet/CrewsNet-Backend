@@ -9,13 +9,14 @@ require("./helpers/passportGithub")(passport)
 
 const userRouter = require("./routes/Users/auth/userRoutes");
 const contestRouter = require("./routes/Users/Contests/contest");
+const globalErrorHandler = require('./controllers/Users/errorController');
 
 const app = express();
 dotenv.config({ path: "./config.env" });
 
 // 1) MIDDLEWARES
 if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
+    app.use(morgan("dev"));
 }
 
 // app.use(express.Router());
@@ -38,8 +39,8 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString();
-  next();
+    req.requestTime = new Date().toISOString();
+    next();
 });
 
 // 3) ROUTES
@@ -47,5 +48,11 @@ app.use("/auth", require("./routes/Users/auth/googleAuth"))
 app.use("/auth", require("./routes/Users/auth/githubAuth"))
 app.use("/api/users", userRouter);
 app.use("/user", contestRouter);
+
+app.all('*', (req, res, next) => {
+    next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+app.use(globalErrorHandler);
 
 module.exports = app;
