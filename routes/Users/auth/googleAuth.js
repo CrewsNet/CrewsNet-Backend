@@ -14,6 +14,7 @@ router.get(
     passport.authenticate("google", { failureRedirect: "/" }),
     (req, res) => {
         // res.redirect("/dashboard")
+        res.send("Dashboard")
         console.log("Loggend In")
     }
 )
@@ -21,7 +22,7 @@ router.get(
 //logout user
 router.get("/logout", (req, res) => {
     req.logout()
-    res.redirect("/")
+    // res.redirect("/")
 })
 
 module.exports = router
