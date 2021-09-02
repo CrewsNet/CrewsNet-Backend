@@ -43,13 +43,43 @@ exports.signup = catchAsync(async(req, res, next) => {
 
     const token = signToken(newUser._id);
 
-    res.status(201).json({
-        status: "success",
-        token,
-        data: {
-            user: newUser,
-        },
-    });
+    await newUser.save();
+
+    // res.status(201).json({
+    //     status: "success",
+    //     token,
+    //     data: {
+    //         user: newUser,
+    //     },
+    // });
+
+    const confirmURL = `${req.protocol}://${req.get(
+      'host'
+    )}/api/users/confirmEmail/${newUser._id}`;
+
+    const message = `Confirm Your Email by sending a patch request at: ${confirmURL}.\n`;
+
+    try {
+        await sendEmail({
+            email: newUser.email,
+            subject: 'Confirm Your Email',
+            message
+        });
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Confirmation Mail Sent!'
+        });
+    } catch (err) {
+        newUser.email = undefined;
+        newUser.token = undefined;
+        await newUser.save({ validateBeforeSave: false });
+
+        return next(
+            new AppError('There was an error sending the email. Try again later!'),
+            500
+        );
+    }
 });
 
 exports.login = catchAsync(async(req, res, next) => {
@@ -60,6 +90,10 @@ exports.login = catchAsync(async(req, res, next) => {
     }
 
     const user = await User.findOne({ email }).select("+password");
+
+    if (user.confirmSignup === false) {
+        return next(new AppError("Please Confirm Your Email First", 401));
+    }
 
     if (!user || !(await user.correctPassword(password, user.password))) {
         return next(new AppError("Incorrect email or password", 401));
@@ -133,6 +167,25 @@ exports.resetPassword = catchAsync(async(req, res, next) => {
     user.password = req.body.password;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
+    await user.save();
+
+    // 3) Update changedPasswordAt property for the user
+    // 4) Log the user in, send JWT
+    createSendToken(user, 200, res);
+});
+
+exports.confirmEmail = catchAsync(async(req, res, next) => {
+    // 1) Get user based on the token
+
+    const user = await User.findOne({
+        _id: req.params.id,
+    });
+
+    // 2) If token has not expired, and there is user, set the new password
+    if (!user) {
+        return next(new AppError('Token is invalid or has expired', 400));
+    }
+    user.confirmSignup = true;
     await user.save();
 
     // 3) Update changedPasswordAt property for the user
