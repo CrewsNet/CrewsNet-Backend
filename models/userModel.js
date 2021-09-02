@@ -3,6 +3,8 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
+/* ----------------------------- Defining Model ----------------------------- */
+
 userSchema = new mongoose.Schema(
   {
     loginId: {
@@ -45,6 +47,8 @@ userSchema = new mongoose.Schema(
   }
 );
 
+/* -------------------- Hashing The PassWord Before Save -------------------- */
+
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -52,12 +56,16 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+/* --------------------------- Comparing Password --------------------------- */
+
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
+
+/* --------------------- Generating PassWord Reset Token -------------------- */
 
 userSchema.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString("hex");
@@ -73,6 +81,8 @@ userSchema.methods.createPasswordResetToken = function () {
 
   return resetToken;
 };
+
+/* ----------------------------- Exporting Model ---------------------------- */
 
 const User = mongoose.model("User", userSchema);
 

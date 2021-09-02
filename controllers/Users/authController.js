@@ -1,15 +1,23 @@
-const User = require("./../../models/userModel");
 const catchAsync = require("./../../utils/catchAsync");
 const jwt = require("jsonwebtoken");
 const AppError = require("./../../utils/appError");
 const sendEmail = require("./../../utils/email");
 const crypto = require("crypto");
 
+/* ---------------------------- Function Imports ---------------------------- */
+
+const User = require("./../../models/userModel");
+
+/* ---------------------------- Generating Token ---------------------------- */
+
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
+
+/* ----------------------- Setting Token In the Cookie ---------------------- */
+
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
@@ -33,6 +41,8 @@ const createSendToken = (user, statusCode, res) => {
     },
   });
 };
+
+/* ---------------------------- SignUp Controller --------------------------- */
 
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = new User({
@@ -73,6 +83,8 @@ exports.signup = catchAsync(async (req, res, next) => {
   }
 });
 
+/* ---------------------------- Post Login Route ---------------------------- */
+
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -99,12 +111,16 @@ exports.login = catchAsync(async (req, res, next) => {
   });
 });
 
+/* ----------------------------- DashBoard Route ---------------------------- */
+
 exports.dashBoard = catchAsync(async (req, res) => {
   res.status(200).json({
     message: "Success",
     data: "Success While Logging in",
   });
 });
+
+/* ----------------------- DashBoard Protection Route ----------------------- */
 
 exports.authPass = async (req, res, next) => {
   // 1) Getting token and check of it's there
@@ -142,6 +158,8 @@ exports.authPass = async (req, res, next) => {
   res.locals.user = currentUser;
   next();
 };
+
+/* -------------------- Forget PassWord Logic Controller ------------------- */
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
@@ -209,6 +227,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // 4) Log the user in, send JWT
   createSendToken(user, 200, res);
 });
+
+/* ----------------------- Mail Confirming Controller ----------------------- */
 
 exports.confirmEmail = catchAsync(async (req, res, next) => {
   try {

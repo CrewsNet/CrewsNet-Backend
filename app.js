@@ -1,22 +1,24 @@
 const express = require("express");
 const morgan = require("morgan");
-const session = require("express-session")
+const session = require("express-session");
 const dotenv = require("dotenv");
-const MongoStore = require("connect-mongo")
-const passport = require("passport")
-require("./helpers/passportGoogle")(passport)
-require("./helpers/passportGithub")(passport)
+const MongoStore = require("connect-mongo");
+const passport = require("passport");
+require("./helpers/passportGoogle")(passport);
+require("./helpers/passportGithub")(passport);
+
+/* ---------------------------- Function Imports ---------------------------- */
 
 const userRouter = require("./routes/Users/auth/userRoutes");
 const contestRouter = require("./routes/Users/Contests/contest");
-const globalErrorHandler = require('./controllers/Users/errorController');
+const globalErrorHandler = require("./controllers/Users/errorController");
 
 const app = express();
 dotenv.config({ path: "./config.env" });
 
-// 1) MIDDLEWARES
+/* --------------------------- Express MiddleWares -------------------------- */
 if (process.env.NODE_ENV === "development") {
-    app.use(morgan("dev"));
+  app.use(morgan("dev"));
 }
 
 // app.use(express.Router());
@@ -32,25 +34,30 @@ app.use(
       mongoUrl: process.env.DATABASE,
     }),
   })
-  )
-  
-  //Passport middleware
-app.use(passport.initialize())
-app.use(passport.session())
+);
+
+//Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use((req, res, next) => {
-    req.requestTime = new Date().toISOString();
-    next();
+  req.requestTime = new Date().toISOString();
+  next();
 });
 
-// 3) ROUTES
-app.use("/auth", require("./routes/Users/auth/googleAuth"))
-app.use("/auth", require("./routes/Users/auth/githubAuth"))
+/* ------------------------------ Route Section ----------------------------- */
+
+/* ------------------- Auth Routes ------------------------ */
+
+app.use("/auth", require("./routes/Users/auth/googleAuth"));
+app.use("/auth", require("./routes/Users/auth/githubAuth"));
+
+/* ---------------------User Routes------------------------ */
 app.use("/api/users", userRouter);
 app.use("/user", contestRouter);
 
-app.all('*', (req, res, next) => {
-    next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+app.all("*", (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 app.use(globalErrorHandler);

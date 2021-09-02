@@ -1,4 +1,8 @@
 const express = require("express");
+const router = express.Router();
+
+/* ---------------------------- Function Imports ---------------------------- */
+
 const {
   dashBoard,
   signup,
@@ -8,14 +12,16 @@ const {
 // const authController = require('../');
 const { ensureAuth, ensureGuest } = require("../../../middleware/googleAuth");
 
-const router = express.Router();
+/* -------------------------- Authorization Routes -------------------------- */
 
 router.post("/signup", signup);
 router.post("/login", login);
 router.get("/dash", authPass, dashBoard);
+router.patch("/confirmEmail/:id", authController.confirmEmail);
+
+/* -------------------------- Forget PassWord Routes ------------------------- */
 
 router.post("/forgotPassword", authController.forgotPassword);
 router.patch("/resetPassword/:token", authController.resetPassword);
-router.patch("/confirmEmail/:id", authController.confirmEmail);
 
 module.exports = router;
