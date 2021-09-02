@@ -11,5 +11,6 @@ router.post("/login", authController.login);
 
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
+router.patch('/confirmEmail/:id', authController.confirmEmail);
 
 module.exports = router;

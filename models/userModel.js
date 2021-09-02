@@ -21,6 +21,10 @@ userSchema = new mongoose.Schema(
         validator: [validator.isEmail, "Please provide a valid email"],
         lowercase: true,
     },
+    confirmSignup: {
+        type: Boolean,
+        default: false,
+    },
     password: {
         type: String,
         required: [true, "Please provide password"],
