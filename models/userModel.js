@@ -27,7 +27,6 @@ userSchema = new mongoose.Schema(
     },
     password: {
         type: String,
-        required: [true, "Please provide password"],
         minLength: [8, "Password should have minimum 8 letters"],
         select: false,
     },
