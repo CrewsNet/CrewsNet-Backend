@@ -3,6 +3,9 @@ const jwt = require("jsonwebtoken");
 const AppError = require("./../../utils/appError");
 const sendEmail = require("./../../utils/email");
 const crypto = require("crypto");
+const { OAuth2Client } = require("google-auth-library");
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 /* ---------------------------- Function Imports ---------------------------- */
 
@@ -89,6 +92,67 @@ exports.signup = catchAsync(async (req, res, next) => {
     );
   }
 });
+
+/* ------------------------------ Google Login ------------------------------ */
+
+exports.googleLogin = (req, res) => {
+  const { tokenId } = req.body;
+  client
+    .verifyIdToken({ idToken: tokenId, audience: process.env.GOOGLE_CLIENT_ID })
+    .then((response) => {
+      const { email_verified, name, email, picture } = response.payload;
+      if (email_verified) {
+        User.findOne({ email: email }).exec((err, user) => {
+          if (err) {
+            return res.status(400).json({
+              error: "Something went wrong",
+            });
+          } else {
+            if (user) {
+              const token = jwt.sign(
+                { _id: user._id },
+                process.env.JWT_SECRET,
+                { expiresIn: "1d" }
+              );
+              const { _id, name, email, photo, confirmSignup} = user;
+
+              res.json({
+                token,
+                user: { _id, name, email, photo, confirmSignup },
+              });
+            } else {
+              var password = email + process.env.JWT_SECRET;
+              var newUser = new User({
+                name,
+                email,
+                password,
+                confirmSignup: email_verified,
+                photo: picture,
+              });
+              newUser.save((err, data) => {
+                if (err) {
+                  return res.status(400).json({
+                    error: "Something went wrong",
+                  });
+                }
+                const token = jwt.sign(
+                  { _id: data._id },
+                  process.env.JWT_SECRET,
+                  { expiresIn: "1d" }
+                );
+                const { _id, name, email, photo, confirmSignup} = user;
+
+              res.json({
+                token,
+                user: { _id, name, email, photo, confirmSignup },
+              });
+              });
+            }
+          }
+        });
+      }
+    });
+};
 
 /* ---------------------------- Post Login Route ---------------------------- */
 
