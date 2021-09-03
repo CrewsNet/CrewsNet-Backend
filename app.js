@@ -12,6 +12,7 @@ require("./helpers/passportGithub")(passport);
 const userRouter = require("./routes/Users/auth/userRoutes");
 const contestRouter = require("./routes/Users/Contests/contest");
 const globalErrorHandler = require("./controllers/Users/errorController");
+const AppError = require("./utils/appError");
 
 const app = express();
 dotenv.config({ path: "./config.env" });

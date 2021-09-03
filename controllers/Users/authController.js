@@ -44,6 +44,13 @@ const createSendToken = (user, statusCode, res) => {
 
 /* ---------------------------- SignUp Controller --------------------------- */
 
+exports.getSignup = (req, res) => {
+  res.status(200).send("SignUp Page");
+};
+exports.getLogin = (req, res) => {
+  res.status(200).send("Login Page");
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = new User({
     email: req.body.email,

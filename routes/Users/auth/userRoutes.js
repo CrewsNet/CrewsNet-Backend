@@ -7,21 +7,27 @@ const {
   dashBoard,
   signup,
   login,
-  protect,
+  authPass,
+  confirmEmail,
+  forgotPassword,
+  resetPassword,
+  getSignup,
+
+  getLogin,
 } = require("../../../controllers/Users/authController");
 // const authController = require('../');
 const { ensureAuth, ensureGuest } = require("../../../middleware/googleAuth");
 
 /* -------------------------- Authorization Routes -------------------------- */
 
-router.post("/signup", signup);
-router.post("/login", login);
-router.get("/dash", authPass, dashBoard);
-router.patch("/confirmEmail/:id", authController.confirmEmail);
+router.post("/signup", ensureGuest, signup).get("/signup", getSignup);
+router.post("/login", ensureGuest, login).get("/login", getLogin);
+router.get("/dash", authPass, ensureAuth, dashBoard);
+router.patch("/confirmEmail/:id", confirmEmail);
 
 /* -------------------------- Forget PassWord Routes ------------------------- */
 
-router.post("/forgotPassword", authController.forgotPassword);
-router.patch("/resetPassword/:token", authController.resetPassword);
+router.post("/forgotPassword", forgotPassword);
+router.patch("/resetPassword/:token", resetPassword);
 
 module.exports = router;
