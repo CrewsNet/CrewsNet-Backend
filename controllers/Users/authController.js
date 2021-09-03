@@ -109,11 +109,7 @@ exports.googleLogin = (req, res) => {
             });
           } else {
             if (user) {
-              const token = jwt.sign(
-                { _id: user._id },
-                process.env.JWT_SECRET,
-                { expiresIn: "1d" }
-              );
+              createSendToken(user,200,res)
               const { _id, name, email, photo, confirmSignup} = user;
 
               res.json({
@@ -135,11 +131,7 @@ exports.googleLogin = (req, res) => {
                     error: "Something went wrong",
                   });
                 }
-                const token = jwt.sign(
-                  { _id: data._id },
-                  process.env.JWT_SECRET,
-                  { expiresIn: "1d" }
-                );
+                createSendToken(user, 200, res)
                 const { _id, name, email, photo, confirmSignup} = user;
 
               res.json({
