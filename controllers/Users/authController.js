@@ -254,3 +254,24 @@ exports.confirmEmail = catchAsync(async (req, res, next) => {
     res.redirect("/signup");
   }
 });
+
+/* ------------------------- Token Conversion Route ------------------------- */
+exports.getToken = async (req, res) => {
+  const token = req.params.token;
+  console.log(token);
+
+  // 2) Verification token
+  const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+
+  // 3) Check if user still exists
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return res.status(400).json({
+      message: "You arent Logged In",
+    });
+  }
+  const id = currentUser._id;
+  res.status(200).json({
+    id: id,
+  });
+};

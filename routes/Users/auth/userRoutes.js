@@ -14,6 +14,7 @@ const {
   getSignup,
 
   getLogin,
+  getToken,
 } = require("../../../controllers/Users/authController");
 // const authController = require('../');
 const { ensureAuth, ensureGuest } = require("../../../middleware/googleAuth");
@@ -29,5 +30,9 @@ router.patch("/confirmEmail/:id", confirmEmail);
 
 router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:token", resetPassword);
+
+/* ------------------------- Token Conversion Route ------------------------- */
+
+router.get("/getToken", getToken);
 
 module.exports = router;

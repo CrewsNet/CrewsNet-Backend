@@ -54,7 +54,7 @@ app.use("/auth", require("./routes/Users/auth/googleAuth"));
 app.use("/auth", require("./routes/Users/auth/githubAuth"));
 
 /* ---------------------User Routes------------------------ */
-app.use("/api/users", userRouter);
+app.use("/users", userRouter);
 app.use("/user", contestRouter);
 
 app.all("*", (req, res, next) => {
