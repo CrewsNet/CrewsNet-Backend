@@ -7,6 +7,7 @@ const {
     dashBoard,
     signup,
     login,
+    googleLogin,
     authPass,
     confirmEmail,
     forgotPassword,
@@ -25,6 +26,7 @@ router.post("/signup", signup).get("/signup", getSignup)
 router.post("/login", login).get("/login", getLogin)
 router.get("/dash", authPass, ensureAuth, dashBoard)
 router.get("/confirmEmail", confirmEmail)
+router.get("/auth/google", googleLogin)
 
 /* -------------------------- Forget PassWord Routes ------------------------- */
 
