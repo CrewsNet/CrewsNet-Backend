@@ -1,5 +1,7 @@
 const catchAsync = require("./../../utils/catchAsync");
 const jwt = require("jsonwebtoken");
+const axios = require("axios");
+const querystring = require("query-string");
 const AppError = require("./../../utils/appError");
 const sendEmail = require("./../../utils/email");
 const crypto = require("crypto");
@@ -155,6 +157,73 @@ exports.googleLogin = (req, res) => {
         });
       }
     });
+};
+
+/* ------------------------------ GITHUB Login ------------------------------ */
+
+const getGithubUser = async (code) => {
+  const githubToken = await axios
+    .post(
+      `https://github.com/login/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`
+    )
+    .then((res) => res.data)
+
+    .catch((err) => {
+      return res.status(400).json({
+        error: "Something went wrong",
+      });
+    });
+
+  const decoded = querystring.parse(githubToken);
+
+  const accessToken = decoded.access_token;
+
+  return axios
+    .get("https://api.github.com/user", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    .then((res) => res.data)
+    .catch((err) => {
+      console.log("Error in getting user");
+      return res.status(400).json({
+        error: "Something went wrong",
+      });
+    });
+};
+
+exports.githubLogin = async (req, res) => {
+  const code = req.query.code;
+  const path = req.query.path;
+  if (!code) {
+    return res.status(400).json({
+      error: "Something went wrong",
+    });
+  }
+
+  const user = await getGithubUser({ code });
+  const token = jwt.sign(user, process.env.JWT_SECRET);
+
+  res.cookie("github-jwt", token, {
+    httpOnly: true,
+  });
+
+  res.redirect(`http://localhost:3000${path}`);
+  res.redirect(path);
+};
+
+exports.githubLoginUser = async (req, res) => {
+  const cookie = req.cookie["github-jwt"];
+  if (!cookie) {
+    return res.status(400).json({
+      error: "Something went wrong",
+    });
+  }
+  try {
+    const decode = jwt.verify(cookie, process.env.JWT_SECRET);
+    return res.status(200).send(decode)
+  } catch (err) {
+    res.send(400).send(null);
+  }
 };
 
 /* ---------------------------- Post Login Route ---------------------------- */
