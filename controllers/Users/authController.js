@@ -3,6 +3,9 @@ const jwt = require("jsonwebtoken");
 const AppError = require("./../../utils/appError");
 const sendEmail = require("./../../utils/email");
 const crypto = require("crypto");
+const { OAuth2Client } = require("google-auth-library");
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 /* ---------------------------- Function Imports ---------------------------- */
 
@@ -51,21 +54,23 @@ exports.getLogin = (req, res) => {
   res.status(200).send("Login Page");
 };
 
-exports.signup = catchAsync(async (req, res, next) => {
+exports.signup = async (req, res, next) => {
   const newUser = new User({
     email: req.body.email,
     password: req.body.password,
     name: req.body.name,
     emailToken: crypto.randomBytes(64).toString("hex"),
   });
+  console.log("Req", req.body);
+  console.log(req.body.email, req.body.password, req.body.name);
 
   await newUser.save();
 
   const confirmURL = `${req.protocol}://${req.get(
     "host"
-  )}/api/users/confirmEmail/${newUser.emailToken}`;
+  )}/users/confirmEmail?token=${newUser.emailToken}`;
 
-  const message = `Confirm Your Email by sending a patch request at: ${confirmURL}.\n`;
+  const message = `Confirm Your Email by clicking here : ${confirmURL}.\n`;
 
   try {
     await sendEmail({
@@ -79,6 +84,7 @@ exports.signup = catchAsync(async (req, res, next) => {
       message: "Confirmation Mail Sent!",
     });
   } catch (err) {
+    console.log("INside Catch Block");
     newUser.email = undefined;
     newUser.token = undefined;
     await newUser.save({ validateBeforeSave: false });
@@ -88,7 +94,68 @@ exports.signup = catchAsync(async (req, res, next) => {
       500
     );
   }
-});
+};
+
+/* ------------------------------ Google Login ------------------------------ */
+
+exports.googleLogin = (req, res) => {
+  const { tokenId } = req.body;
+  client
+    .verifyIdToken({ idToken: tokenId, audience: process.env.GOOGLE_CLIENT_ID })
+    .then((response) => {
+      const { email_verified, name, email, picture } = response.payload;
+      if (email_verified) {
+        User.findOne({ email: email }).exec((err, user) => {
+          if (err) {
+            return res.status(400).json({
+              error: "Something went wrong",
+            });
+          } else {
+            if (user) {
+              const token = jwt.sign(
+                { _id: user._id },
+                process.env.JWT_SECRET,
+                { expiresIn: "1d" }
+              );
+              const { _id, name, email, photo, confirmSignup } = user;
+
+              res.json({
+                token,
+                user: { _id, name, email, photo, confirmSignup },
+              });
+            } else {
+              var password = email + process.env.JWT_SECRET;
+              var newUser = new User({
+                name,
+                email,
+                password,
+                confirmSignup: email_verified,
+                photo: picture,
+              });
+              newUser.save((err, data) => {
+                if (err) {
+                  return res.status(400).json({
+                    error: "Something went wrong",
+                  });
+                }
+                const token = jwt.sign(
+                  { _id: user._id },
+                  process.env.JWT_SECRET,
+                  { expiresIn: "1d" }
+                );
+                const { _id, name, email, photo, confirmSignup } = user;
+
+                res.json({
+                  token,
+                  user: { _id, name, email, photo, confirmSignup },
+                });
+              });
+            }
+          }
+        });
+      }
+    });
+};
 
 /* ---------------------------- Post Login Route ---------------------------- */
 
@@ -101,13 +168,13 @@ exports.login = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ email }).select("+password");
 
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError("Incorrect email or password", 401));
+  }
   if (user.confirmSignup === false) {
     return next(new AppError("Please Confirm Your Email First", 401));
   }
 
-  if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError("Incorrect email or password", 401));
-  }
   createSendToken(user, 200, res);
 
   //   const token = signToken(user._id);
@@ -148,7 +215,7 @@ exports.authPass = async (req, res, next) => {
 
   if (!token) {
     return res.status(400).json({
-      message: "You arent Logged In",
+      message: "You aren't Logged In",
     });
   }
 
@@ -159,7 +226,7 @@ exports.authPass = async (req, res, next) => {
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
     return res.status(400).json({
-      message: "You arent Logged In",
+      message: "You aren't Logged In",
     });
   }
 
@@ -244,7 +311,9 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
 exports.confirmEmail = catchAsync(async (req, res, next) => {
   try {
-    const user = await User.findOne({ emailToken: req.params.token });
+    console.log("Inside Confirm Email Route");
+    const token = req.query.token;
+    const user = await User.findOne({ emailToken: token });
 
     if (!user) {
       return next(new AppError("Token is invalid or has expired", 400));
@@ -253,10 +322,15 @@ exports.confirmEmail = catchAsync(async (req, res, next) => {
     user.emailToken = null;
     user.confirmSignup = true;
     await user.save();
-    res.redirect("/login");
+    res.status(200).json({
+      status: "success",
+      message: "Email Verified",
+    });
+    // res.redirect("/login")
   } catch (error) {
     console.log(error);
-    res.redirect("/signup");
+    res.status(500).end();
+    // res.redirect("/signup")
   }
 });
 
@@ -272,7 +346,7 @@ exports.getToken = async (req, res) => {
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
     return res.status(400).json({
-      message: "You arent Logged In",
+      message: "You aren't Logged In",
     });
   }
   const id = currentUser._id;
