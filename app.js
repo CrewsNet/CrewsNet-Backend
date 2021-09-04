@@ -1,7 +1,7 @@
-const express = require("express");
-const morgan = require("morgan");
-const session = require("express-session");
-const dotenv = require("dotenv");
+const express = require("express")
+const morgan = require("morgan")
+const session = require("express-session")
+const dotenv = require("dotenv")
 // const MongoStore = require("connect-mongo");
 // const passport = require("passport");
 // require("./helpers/passportGoogle")(passport);
@@ -27,10 +27,17 @@ app.use(express.json())
 app.use(express.static(`${__dirname}/public`))
 
 //CORS POLICY
+// app.use((req, res, next) => {
+//   res.setHeader("Access-Control-Allow-Origin", "*")
+//   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+//   next()
+// })
+
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*")
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-  next()
+  res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, PATCH, DELETE")
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+  next() // dont forget this
 })
 
 // app.use(

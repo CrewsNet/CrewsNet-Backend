@@ -4,29 +4,29 @@ const router = express.Router()
 /* ---------------------------- Function Imports ---------------------------- */
 
 const {
-    dashBoard,
-    signup,
-    login,
-    googleLogin,
-    authPass,
-    confirmEmail,
-    forgotPassword,
-    resetPassword,
-    getSignup,
+  dashBoard,
+  signup,
+  login,
+  googleLogin,
+  authPass,
+  confirmEmail,
+  forgotPassword,
+  resetPassword,
+  getSignup,
 
-    getLogin,
-    getToken,
+  getLogin,
+  getToken,
 } = require("../../../controllers/Users/authController")
-    // const authController = require('../');
+// const authController = require('../');
 const { ensureAuth, ensureGuest } = require("../../../middleware/googleAuth")
 
 /* -------------------------- Authorization Routes -------------------------- */
 
 router.post("/signup", signup).get("/signup", getSignup)
 router.post("/login", login).get("/login", getLogin)
-router.get("/dash", authPass, ensureAuth, dashBoard)
+router.get("/dash", authPass, dashBoard)
 router.get("/confirmEmail", confirmEmail)
-router.get("/auth/google", googleLogin)
+router.post("/auth/google", googleLogin)
 
 /* -------------------------- Forget PassWord Routes ------------------------- */
 
