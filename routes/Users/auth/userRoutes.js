@@ -22,8 +22,8 @@ const { ensureAuth, ensureGuest } = require("../../../middleware/googleAuth");
 
 /* -------------------------- Authorization Routes -------------------------- */
 
-router.post("/signup", ensureGuest, signup).get("/signup", getSignup);
-router.post("/login", ensureGuest, login).get("/login", getLogin);
+router.post("/signup", signup).get("/signup", getSignup);
+router.post("/login", login).get("/login", getLogin);
 router.get("/dash", authPass, ensureAuth, dashBoard);
 router.patch("/confirmEmail/:id", confirmEmail);
 router.post("/auth/google", googleLogin)
