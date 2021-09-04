@@ -136,7 +136,12 @@ exports.authPass = async (req, res, next) => {
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
+    console.log("Inside If of auth Pass");
+    console.log(req.headers.authorization);
+    console.log(req.headers.authorization.startsWith("Bearer"));
+
     token = req.headers.authorization.split(" ")[1];
+    console.log(token);
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
