@@ -1,5 +1,5 @@
-const express = require("express")
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 
 /* ---------------------------- Function Imports ---------------------------- */
 
@@ -16,25 +16,25 @@ const {
 
   getLogin,
   getToken,
-} = require("../../../controllers/Users/authController")
+} = require("../../../controllers/Users/authController");
 // const authController = require('../');
-const { ensureAuth, ensureGuest } = require("../../../middleware/googleAuth")
+const { ensureAuth, ensureGuest } = require("../../../middleware/googleAuth");
 
 /* -------------------------- Authorization Routes -------------------------- */
 
-router.post("/signup", signup).get("/signup", getSignup)
-router.post("/login", login).get("/login", getLogin)
-router.get("/dash", authPass, dashBoard)
-router.get("/confirmEmail", confirmEmail)
-router.post("/auth/google", googleLogin)
+router.post("/signup", signup).get("/signup", getSignup);
+router.post("/login", login).get("/login", getLogin);
+router.get("/dash", authPass, dashBoard);
+router.get("/confirmEmail", confirmEmail);
+router.post("/auth/google", googleLogin);
 
 /* -------------------------- Forget PassWord Routes ------------------------- */
 
-router.post("/forgotPassword", forgotPassword)
-router.patch("/resetPassword/:token", resetPassword)
+router.post("/forgotPassword", forgotPassword);
+router.patch("/resetPassword", resetPassword);
 
 /* ------------------------- Token Conversion Route ------------------------- */
 
-router.get("/getToken", getToken)
+router.get("/getToken", getToken);
 
-module.exports = router
+module.exports = router;

@@ -336,7 +336,8 @@ exports.confirmEmail = catchAsync(async (req, res, next) => {
 
 /* ------------------------- Token Conversion Route ------------------------- */
 exports.getToken = async (req, res) => {
-  const token = req.params.token;
+  console.log("INsdie token route");
+  const token = req.query.token;
   console.log(token);
 
   // 2) Verification token
