@@ -9,23 +9,31 @@ const dotenv = require("dotenv");
 
 /* ---------------------------- Function Imports ---------------------------- */
 
-const userRouter = require("./routes/Users/auth/userRoutes");
-const contestRouter = require("./routes/Users/Contests/contest");
-const globalErrorHandler = require("./controllers/Users/errorController");
-const AppError = require("./utils/appError");
+const userRouter = require("./routes/Users/auth/userRoutes")
+const contestRouter = require("./routes/Users/Contests/contest")
+const globalErrorHandler = require("./controllers/Users/errorController")
+const AppError = require("./utils/appError")
 
-const app = express();
-dotenv.config({ path: "./config.env" });
+const app = express()
+dotenv.config({ path: "./config.env" })
 
 /* --------------------------- Express MiddleWares -------------------------- */
 if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
+  app.use(morgan("dev"))
 }
 
 // app.use(express.Router());
-app.use(express.json());
-app.use(express.static(`${__dirname}/public`));
+app.use(express.json())
+app.use(express.static(`${__dirname}/public`))
 
+//CORS POLICY
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*")
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+  next()
+})
+
+<<<<<<< HEAD
 // app.use(
 //   session({
 //     secret: process.env.SESSION_SECRET,
@@ -40,11 +48,27 @@ app.use(express.static(`${__dirname}/public`));
 //Passport middleware
 // app.use(passport.initialize());
 // app.use(passport.session());
+=======
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.DATABASE,
+    }),
+  })
+)
+
+//Passport middleware
+app.use(passport.initialize())
+app.use(passport.session())
+>>>>>>> 4fffe6868bfb829f5e4bc071e93e9618839f99b0
 
 app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString();
-  next();
-});
+  req.requestTime = new Date().toISOString()
+  next()
+})
 
 /* ------------------------------ Route Section ----------------------------- */
 
@@ -54,13 +78,13 @@ app.use((req, res, next) => {
 // app.use("/auth", require("./routes/Users/auth/githubAuth"));
 
 /* ---------------------User Routes------------------------ */
-app.use("/users", userRouter);
-app.use("/user", contestRouter);
+app.use("/users", userRouter)
+app.use("/user", contestRouter)
 
 app.all("*", (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
-});
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404))
+})
 
-app.use(globalErrorHandler);
+app.use(globalErrorHandler)
 
-module.exports = app;
+module.exports = app
