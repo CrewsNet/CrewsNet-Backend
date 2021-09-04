@@ -33,20 +33,20 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: process.env.DATABASE,
-    }),
-  })
-)
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: false,
+//     store: MongoStore.create({
+//       mongoUrl: process.env.DATABASE,
+//     }),
+//   })
+// )
 
-//Passport middleware
-app.use(passport.initialize())
-app.use(passport.session())
+// //Passport middleware
+// app.use(passport.initialize())
+// app.use(passport.session())
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString()
