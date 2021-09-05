@@ -1,7 +1,15 @@
+<<<<<<< HEAD
 const express = require("express");
 const morgan = require("morgan");
 const session = require("express-session");
 const dotenv = require("dotenv");
+=======
+const express = require("express")
+const morgan = require("morgan")
+const session = require("express-session")
+const dotenv = require("dotenv")
+const cors = require("cors")
+>>>>>>> ce741d692777cbe9c607ba606df127ed412189b4
 // const MongoStore = require("connect-mongo");
 // const passport = require("passport");
 // require("./helpers/passportGoogle")(passport);
@@ -14,9 +22,15 @@ const contestRouter = require("./routes/Users/Contests/contest");
 const globalErrorHandler = require("./controllers/Users/errorController");
 const AppError = require("./utils/appError");
 
+<<<<<<< HEAD
 const app = express();
 dotenv.config({ path: "./config.env" });
 
+=======
+const app = express()
+dotenv.config({ path: "./config.env" })
+// app.use(cors({ credentials: true, origin: true }))
+>>>>>>> ce741d692777cbe9c607ba606df127ed412189b4
 /* --------------------------- Express MiddleWares -------------------------- */
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -34,6 +48,7 @@ app.use(express.static(`${__dirname}/public`));
 // })
 
 app.use((req, res, next) => {
+<<<<<<< HEAD
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
@@ -45,6 +60,14 @@ app.use((req, res, next) => {
   );
   next(); // dont forget this
 });
+=======
+  res.setHeader("Access-Control-Allow-Origin", "*")
+  res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, PATCH, DELETE")
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+  res.header("Access-Control-Allow-Credentials", true)
+  next() // dont forget this
+})
+>>>>>>> ce741d692777cbe9c607ba606df127ed412189b4
 
 // app.use(
 //   session({

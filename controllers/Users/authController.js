@@ -1,10 +1,13 @@
 const catchAsync = require("./../../utils/catchAsync");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
+const { get } = require("lodash");
+const querystring = require("query-string");
 const AppError = require("./../../utils/appError");
 const sendEmail = require("./../../utils/email");
 const crypto = require("crypto");
 const { OAuth2Client } = require("google-auth-library");
+
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 /* ---------------------------- Function Imports ---------------------------- */
@@ -55,44 +58,51 @@ exports.getLogin = (req, res) => {
 };
 
 exports.signup = async (req, res, next) => {
-  const newUser = new User({
-    email: req.body.email,
-    password: req.body.password,
-    name: req.body.name,
-    emailToken: crypto.randomBytes(64).toString("hex"),
-  });
-  console.log("Req", req.body);
-  console.log(req.body.email, req.body.password, req.body.name);
-
-  await newUser.save();
-
-  const confirmURL = `${req.protocol}://${req.get(
-    "host"
-  )}/users/confirmEmail?token=${newUser.emailToken}`;
-
-  const message = `Confirm Your Email by clicking here : ${confirmURL}.\n`;
-
   try {
-    await sendEmail({
-      email: newUser.email,
-      subject: "Confirm Your Email",
-      message,
+    const newUser = new User({
+      email: req.body.email,
+      password: req.body.password,
+      name: req.body.name,
+      emailToken: crypto.randomBytes(64).toString("hex"),
     });
+    // console.log("Req", req.body);
+    // console.log(req.body.email, req.body.password, req.body.name);
 
-    res.status(200).json({
-      status: "success",
-      message: "Confirmation Mail Sent!",
+    await newUser.save();
+
+    const confirmURL = `${req.protocol}://${req.get(
+      "host"
+    )}/users/confirmEmail?token=${newUser.emailToken}`;
+
+    const message = `Confirm Your Email by clicking here : ${confirmURL}.\n`;
+
+    try {
+      await sendEmail({
+        email: newUser.email,
+        subject: "Confirm Your Email",
+        message,
+      });
+
+      res.status(200).json({
+        status: "success",
+        message: "Confirmation Mail Sent!",
+      });
+    } catch (err) {
+      console.log("INside Catch Block");
+      newUser.email = undefined;
+      newUser.token = undefined;
+      await newUser.save({ validateBeforeSave: false });
+
+      return next(
+        new AppError("There was an error sending the email. Try again later!"),
+        500
+      );
+    }
+  } catch (e) {
+    res.status(400).json({
+      status: "error",
+      error: e,
     });
-  } catch (err) {
-    console.log("INside Catch Block");
-    newUser.email = undefined;
-    newUser.token = undefined;
-    await newUser.save({ validateBeforeSave: false });
-
-    return next(
-      new AppError("There was an error sending the email. Try again later!"),
-      500
-    );
   }
 };
 
@@ -118,7 +128,9 @@ exports.googleLogin = (req, res) => {
                 { expiresIn: "1d" }
               );
               const { _id, name, email, photo, confirmSignup } = user;
-
+              res.cookie("crewsnet", token, {
+                httpOnly: true,
+              });
               res.json({
                 token,
                 user: { _id, name, email, photo, confirmSignup },
@@ -144,7 +156,9 @@ exports.googleLogin = (req, res) => {
                   { expiresIn: "1d" }
                 );
                 const { _id, name, email, photo, confirmSignup } = user;
-
+                res.cookie("crewsnet", token, {
+                  httpOnly: true,
+                });
                 res.json({
                   token,
                   user: { _id, name, email, photo, confirmSignup },
@@ -160,60 +174,74 @@ exports.googleLogin = (req, res) => {
 /* ------------------------------ GITHUB Login ------------------------------ */
 
 const getGithubUser = async (code) => {
-  const githubToken = await axios
-    .post(
-      `https://github.com/login/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`
-    )
-    .then((res) => res.data)
+  try {
+    console.log(code);
+    const githubToken = await axios.post(
+      `https://github.com/login/oauth/access_token`,
+      {
+        code: code,
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+      },
+      {
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+    console.log(githubToken.data.access_token);
 
-    .catch((err) => {
-      return res.status(400).json({
-        error: "Something went wrong",
+    const accessToken = githubToken.data.access_token;
+    console.log(accessToken);
+    try {
+      const userData = await axios.get("https://api.github.com/user", {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
-    });
-
-  const decoded = querystring.parse(githubToken);
-
-  const accessToken = decoded.access_token;
-
-  return axios
-    .get("https://api.github.com/user", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-    .then((res) => res.data)
-    .catch((err) => {
-      console.log("Error in getting user");
-      return res.status(400).json({
-        error: "Something went wrong",
-      });
-    });
+      console.log(userData.data);
+      return userData.data;
+    } catch (err) {
+      throw err;
+    }
+  } catch (err) {
+    // console.log(err.message)
+    throw err;
+  }
 };
-
 exports.githubLogin = async (req, res) => {
+  // console.log(req.query)
   const code = req.query.code;
-  const path = req.query.path;
+  const path = get(req.query.path);
+  // console.log(code)
   if (!code) {
     return res.status(400).json({
-      error: "Something went wrong",
+      error: "No code found",
     });
   }
 
-  const user = await getGithubUser({ code });
-  const token = jwt.sign(user, process.env.JWT_SECRET);
+  const user = await getGithubUser(code);
+  await console.log(user);
+  const token = await jwt.sign(user, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
 
-  res.cookie("github-jwt", token, {
+  await res.cookie("crewsnet", token, {
     httpOnly: true,
   });
 
-  res.redirect(`http://localhost:3000${path}`);
-  res.redirect(path);
+  // res.json({ user, token })
+  await res.redirect(`http://localhost:3000/signin`);
+  // res.redirect("http://localhost:3000/dashboard")
+  // res.redirect(`http://localhost:3000${path}`)
+  // res.setHeader('Content-Type')
+
+  // res.redirect(path)
 };
 
 exports.githubLoginUser = async (req, res) => {
-  const cookie = req.cookie["github-jwt"];
+  const cookie = get(req.cookie["crewsnet"]);
   if (!cookie) {
     return res.status(400).json({
-      error: "Something went wrong",
+      error: "No cookie found",
     });
   }
   try {
@@ -246,10 +274,10 @@ exports.login = catchAsync(async (req, res, next) => {
 
   //   const token = signToken(user._id);
 
-  res.status(200).json({
-    status: "success",
-    token,
-  });
+  // res.status(200).json({
+  //   status: "success",
+  //   token,
+  // });
 });
 
 /* ----------------------------- DashBoard Route ---------------------------- */
