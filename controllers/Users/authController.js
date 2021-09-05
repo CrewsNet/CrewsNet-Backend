@@ -1,12 +1,10 @@
 const catchAsync = require("./../../utils/catchAsync");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
-const querystring = require("query-string");
 const AppError = require("./../../utils/appError");
 const sendEmail = require("./../../utils/email");
 const crypto = require("crypto");
 const { OAuth2Client } = require("google-auth-library");
-
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 /* ---------------------------- Function Imports ---------------------------- */

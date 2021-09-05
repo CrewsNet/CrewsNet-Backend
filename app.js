@@ -1,7 +1,7 @@
-const express = require("express")
-const morgan = require("morgan")
-const session = require("express-session")
-const dotenv = require("dotenv")
+const express = require("express");
+const morgan = require("morgan");
+const session = require("express-session");
+const dotenv = require("dotenv");
 // const MongoStore = require("connect-mongo");
 // const passport = require("passport");
 // require("./helpers/passportGoogle")(passport);
@@ -9,22 +9,22 @@ const dotenv = require("dotenv")
 
 /* ---------------------------- Function Imports ---------------------------- */
 
-const userRouter = require("./routes/Users/auth/userRoutes")
-const contestRouter = require("./routes/Users/Contests/contest")
-const globalErrorHandler = require("./controllers/Users/errorController")
-const AppError = require("./utils/appError")
+const userRouter = require("./routes/Users/auth/userRoutes");
+const contestRouter = require("./routes/Users/Contests/contest");
+const globalErrorHandler = require("./controllers/Users/errorController");
+const AppError = require("./utils/appError");
 
-const app = express()
-dotenv.config({ path: "./config.env" })
+const app = express();
+dotenv.config({ path: "./config.env" });
 
 /* --------------------------- Express MiddleWares -------------------------- */
 if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"))
+  app.use(morgan("dev"));
 }
 
 // app.use(express.Router());
-app.use(express.json())
-app.use(express.static(`${__dirname}/public`))
+app.use(express.json());
+app.use(express.static(`${__dirname}/public`));
 
 //CORS POLICY
 // app.use((req, res, next) => {
@@ -34,11 +34,17 @@ app.use(express.static(`${__dirname}/public`))
 // })
 
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*")
-  res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, PATCH, DELETE")
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
-  next() // dont forget this
-})
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+  );
+  next(); // dont forget this
+});
 
 // app.use(
 //   session({
@@ -56,9 +62,9 @@ app.use((req, res, next) => {
 // app.use(passport.session())
 
 app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString()
-  next()
-})
+  req.requestTime = new Date().toISOString();
+  next();
+});
 
 /* ------------------------------ Route Section ----------------------------- */
 
@@ -68,13 +74,16 @@ app.use((req, res, next) => {
 // app.use("/auth", require("./routes/Users/auth/githubAuth"));
 
 /* ---------------------User Routes------------------------ */
-app.use("/users", userRouter)
-app.use("/user", contestRouter)
+app.get("/p", (req, res) => {
+  res.status(200).json({ message });
+});
+app.use("/users", userRouter);
+app.use("/user", contestRouter);
 
 app.all("*", (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404))
-})
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
 
-app.use(globalErrorHandler)
+app.use(globalErrorHandler);
 
-module.exports = app
+module.exports = app;
