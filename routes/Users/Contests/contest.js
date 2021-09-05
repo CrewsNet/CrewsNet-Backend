@@ -21,7 +21,7 @@ const {
 
 /* ------------------- Fetching Contest From External Site ------------------ */
 
-router.get("/contests", contests);
+router.get("/", contests);
 
 /* ----------------------------- Saving Contest ----------------------------- */
 
@@ -29,7 +29,7 @@ router.patch("/save", authPass, saveContest);
 
 /* -------------------------- Getting Saved Contest ------------------------- */
 
-router.get("/getSaveContest", authPass, getSavedContest);
+router.get("/getSave", authPass, getSavedContest);
 
 /* ---------------------------- Unsaving Contest ---------------------------- */
 

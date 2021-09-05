@@ -79,7 +79,7 @@ app.use((req, res, next) => {
 /* ---------------------User Routes------------------------ */
 
 app.use("/users", userRouter);
-app.use("/user", contestRouter);
+app.use("/user/contest", contestRouter);
 app.use("/user", profileRouter);
 
 app.all("*", (req, res, next) => {
