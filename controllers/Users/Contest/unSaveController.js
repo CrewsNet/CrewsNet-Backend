@@ -13,7 +13,7 @@ exports.unSave = (req, res) => {
   } = req.body;
 
   const arr = user.savedContest.filter((obj) => {
-    return obj.url === url;
+    return obj.url === url && obj.start_time === start_time;
   });
 
   user.savedContest = arr;
