@@ -55,39 +55,46 @@ exports.getLogin = (req, res) => {
 }
 
 exports.signup = async (req, res, next) => {
-  const newUser = new User({
-    email: req.body.email,
-    password: req.body.password,
-    name: req.body.name,
-    emailToken: crypto.randomBytes(64).toString("hex"),
-  })
-  console.log("Req", req.body)
-  console.log(req.body.email, req.body.password, req.body.name)
-
-  await newUser.save()
-
-  const confirmURL = `${req.protocol}://${req.get("host")}/users/confirmEmail?token=${newUser.emailToken}`
-
-  const message = `Confirm Your Email by clicking here : ${confirmURL}.\n`
-
   try {
-    await sendEmail({
-      email: newUser.email,
-      subject: "Confirm Your Email",
-      message,
+    const newUser = new User({
+      email: req.body.email,
+      password: req.body.password,
+      name: req.body.name,
+      emailToken: crypto.randomBytes(64).toString("hex"),
     })
+    // console.log("Req", req.body);
+    // console.log(req.body.email, req.body.password, req.body.name);
 
-    res.status(200).json({
-      status: "success",
-      message: "Confirmation Mail Sent!",
+    await newUser.save()
+
+    const confirmURL = `${req.protocol}://${req.get("host")}/users/confirmEmail?token=${newUser.emailToken}`
+
+    const message = `Confirm Your Email by clicking here : ${confirmURL}.\n`
+
+    try {
+      await sendEmail({
+        email: newUser.email,
+        subject: "Confirm Your Email",
+        message,
+      })
+
+      res.status(200).json({
+        status: "success",
+        message: "Confirmation Mail Sent!",
+      })
+    } catch (err) {
+      console.log("INside Catch Block")
+      newUser.email = undefined
+      newUser.token = undefined
+      await newUser.save({ validateBeforeSave: false })
+
+      return next(new AppError("There was an error sending the email. Try again later!"), 500)
+    }
+  } catch (e) {
+    res.status(400).json({
+      status: "error",
+      error: e,
     })
-  } catch (err) {
-    console.log("INside Catch Block")
-    newUser.email = undefined
-    newUser.token = undefined
-    await newUser.save({ validateBeforeSave: false })
-
-    return next(new AppError("There was an error sending the email. Try again later!"), 500)
   }
 }
 
@@ -144,7 +151,7 @@ exports.googleLogin = (req, res) => {
 
 /* ------------------------------ GITHUB Login ------------------------------ */
 
-const getGithubUser = async ({ req, res, code }) => {
+const getGithubUser = async (code) => {
   const githubToken = await axios
     .post(`https://github.com/login/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`)
     .then((res) => res.data)
@@ -181,7 +188,7 @@ exports.githubLogin = async (req, res) => {
     })
   }
 
-  const user = await getGithubUser({ req, res, code })
+  const user = await getGithubUser({ code })
   const token = jwt.sign(user, process.env.JWT_SECRET)
 
   res.cookie("github-jwt", token, {
@@ -229,10 +236,10 @@ exports.login = catchAsync(async (req, res, next) => {
 
   //   const token = signToken(user._id);
 
-  res.status(200).json({
-    status: "success",
-    token,
-  })
+  // res.status(200).json({
+  //   status: "success",
+  //   token,
+  // });
 })
 
 /* ----------------------------- DashBoard Route ---------------------------- */
