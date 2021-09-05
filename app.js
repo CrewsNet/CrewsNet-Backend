@@ -2,6 +2,7 @@ const express = require("express")
 const morgan = require("morgan")
 const session = require("express-session")
 const dotenv = require("dotenv")
+const cors = require("cors")
 // const MongoStore = require("connect-mongo");
 // const passport = require("passport");
 // require("./helpers/passportGoogle")(passport);
@@ -16,7 +17,7 @@ const AppError = require("./utils/appError")
 
 const app = express()
 dotenv.config({ path: "./config.env" })
-
+// app.use(cors({ credentials: true, origin: true }))
 /* --------------------------- Express MiddleWares -------------------------- */
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"))
@@ -37,6 +38,7 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*")
   res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, PATCH, DELETE")
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+  res.header("Access-Control-Allow-Credentials", true)
   next() // dont forget this
 })
 
