@@ -29,7 +29,7 @@ router.patch("/save", authPass, saveContest);
 
 /* -------------------------- Getting Saved Contest ------------------------- */
 
-router.get("/getContest", authPass, getSavedContest);
+router.get("/getSaveContest", authPass, getSavedContest);
 
 /* ---------------------------- Unsaving Contest ---------------------------- */
 
