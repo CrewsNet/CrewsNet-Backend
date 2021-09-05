@@ -77,9 +77,7 @@ app.use((req, res, next) => {
 // app.use("/auth", require("./routes/Users/auth/githubAuth"));
 
 /* ---------------------User Routes------------------------ */
-app.get("/p", (req, res) => {
-  res.status(200).json({ message });
-});
+
 app.use("/users", userRouter);
 app.use("/user", contestRouter);
 app.use("/user", profileRouter);
