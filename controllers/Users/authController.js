@@ -151,7 +151,7 @@ exports.googleLogin = (req, res) => {
 
 /* ------------------------------ GITHUB Login ------------------------------ */
 
-const getGithubUser = async (code) => {
+const getGithubUser = async ({ res, code }) => {
   const githubToken = await axios
     .post(`https://github.com/login/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`)
     .then((res) => res.data)
@@ -188,7 +188,7 @@ exports.githubLogin = async (req, res) => {
     })
   }
 
-  const user = await getGithubUser({ code })
+  const user = await getGithubUser({ res, code })
   const token = jwt.sign(user, process.env.JWT_SECRET)
 
   res.cookie("github-jwt", token, {
