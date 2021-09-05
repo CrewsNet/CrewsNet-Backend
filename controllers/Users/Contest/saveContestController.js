@@ -1,17 +1,8 @@
 exports.saveContest = (req, res) => {
-  const user = req.user;
-  const {
-    name,
-    url,
-    start_time,
-    end_time,
-    duration,
-    site,
-    in_24_hours,
-    status,
-  } = req.body;
+  const user = req.user
+  const { name, url, start_time, end_time, duration, site, in_24_hours, status } = req.body
 
-  console.log(user);
+  console.log(user)
 
   user.savedContest.push({
     name,
@@ -22,21 +13,22 @@ exports.saveContest = (req, res) => {
     site,
     in_24_hours,
     status,
-  });
-  user.save();
+  })
+  user.savedContest = [...new Set(user.savedContest)]
+
+  user.save()
 
   res.status(200).json({
     message: "Success",
     data: user,
-  });
-};
+  })
+}
 
-exports.getSavedContest=(req,res)=>{
-    const user=req.user
-    const contest=user.savedContest
-    res.status(200).json({
-        message:"Success",
-        data:contest
-
-    })
+exports.getSavedContest = (req, res) => {
+  const user = req.user
+  const contest = user.savedContest
+  res.status(200).json({
+    message: "Success",
+    data: contest,
+  })
 }
