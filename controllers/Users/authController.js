@@ -2,7 +2,6 @@ const catchAsync = require("./../../utils/catchAsync");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const { get } = require("lodash");
-const querystring = require("query-string");
 const AppError = require("./../../utils/appError");
 const sendEmail = require("./../../utils/email");
 const crypto = require("crypto");
