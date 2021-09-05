@@ -207,17 +207,10 @@ exports.githubLogin = async (req, res) => {
     expiresIn: "1d",
   })
 
-  await res.cookie("crewsnet", token, {
-    httpOnly: true,
-  })
+  await res.cookie("crewsnet", token, {})
 
   // res.json({ user, token })
-  await res.redirect(`http://localhost:3000/signin`)
-  // res.redirect("http://localhost:3000/dashboard")
-  // res.redirect(`http://localhost:3000${path}`)
-  // res.setHeader('Content-Type')
-
-  // res.redirect(path)
+  await res.redirect(`http://localhost:3000/dashboard`)
 }
 
 exports.githubLoginUser = async (req, res) => {
