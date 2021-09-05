@@ -147,8 +147,9 @@ exports.googleLogin = (req, res) => {
 const getGithubUser = async (code) => {
   const githubToken = await axios
     .post(`https://github.com/login/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`)
-    .then((res) => res.data)
-
+    .then((res) => {
+      res.data
+    })
     .catch((err) => {
       return res.status(400).json({
         error: "Something went wrong",
@@ -175,6 +176,7 @@ const getGithubUser = async (code) => {
 exports.githubLogin = async (req, res) => {
   const code = req.query.code
   const path = req.query.path
+  // console.log(req.query)
   if (!code) {
     return res.status(400).json({
       error: "Something went wrong",
