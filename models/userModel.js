@@ -41,6 +41,18 @@ userSchema = new mongoose.Schema(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    savedContest: [
+      {
+        name: String,
+        url: String,
+        start_time: Date,
+        end_time: Date,
+        duration: String,
+        site: String,
+        in_24_hours: String,
+        status: String,
+      },
+    ],
   },
   {
     timestamps: true,
