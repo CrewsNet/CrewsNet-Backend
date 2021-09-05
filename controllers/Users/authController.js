@@ -2,7 +2,6 @@ const catchAsync = require("./../../utils/catchAsync")
 const jwt = require("jsonwebtoken")
 const axios = require("axios")
 const { get } = require("lodash")
-const querystring = require("query-string")
 const AppError = require("./../../utils/appError")
 const sendEmail = require("./../../utils/email")
 const crypto = require("crypto")
@@ -24,7 +23,7 @@ const signToken = (id) => {
 
 /* ----------------------- Setting Token In the Cookie ---------------------- */
 
-const createSendToken = async (user, statusCode, res) => {
+const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id)
   const cookieOptions = {
     expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
@@ -32,7 +31,7 @@ const createSendToken = async (user, statusCode, res) => {
   }
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true
 
-  await res.cookie("jwt", token, cookieOptions)
+  res.cookie("jwt", token, cookieOptions)
 
   // Remove password from output
   user.password = undefined
@@ -104,7 +103,6 @@ exports.signup = async (req, res, next) => {
 
 exports.googleLogin = (req, res) => {
   const { tokenId } = req.body
-  console.log("req.cookies", req)
   client.verifyIdToken({ idToken: tokenId, audience: process.env.GOOGLE_CLIENT_ID }).then((response) => {
     const { email_verified, name, email, picture } = response.payload
     if (email_verified) {
@@ -117,14 +115,13 @@ exports.googleLogin = (req, res) => {
           if (user) {
             const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
             const { _id, name, email, photo, confirmSignup } = user
-            res
-              .cookie("crewsnet", token, {
-                httpOnly: true,
-              })
-              .json({
-                token,
-                user: { _id, name, email, photo, confirmSignup },
-              })
+            res.cookie("crewsnet", token, {
+              httpOnly: true,
+            })
+            res.json({
+              token,
+              user: { _id, name, email, photo, confirmSignup },
+            })
           } else {
             var password = email + process.env.JWT_SECRET
             var newUser = new User({
@@ -142,15 +139,13 @@ exports.googleLogin = (req, res) => {
               }
               const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
               const { _id, name, email, photo, confirmSignup } = user
-
-              res
-                .cookie("crewsnet", token, {
-                  httpOnly: true,
-                })
-                .json({
-                  token,
-                  user: { _id, name, email, photo, confirmSignup },
-                })
+              res.cookie("crewsnet", token, {
+                httpOnly: true,
+              })
+              res.json({
+                token,
+                user: { _id, name, email, photo, confirmSignup },
+              })
             })
           }
         }
@@ -208,7 +203,9 @@ exports.githubLogin = async (req, res) => {
 
   const user = await getGithubUser(code)
   await console.log(user)
-  const token = await jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "1d" })
+  const token = await jwt.sign(user, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  })
 
   await res.cookie("crewsnet", token, {
     httpOnly: true,
