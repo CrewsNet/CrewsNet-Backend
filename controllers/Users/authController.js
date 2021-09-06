@@ -57,51 +57,62 @@ exports.getLogin = (req, res) => {
 };
 
 exports.signup = async(req, res, next) => {
-    try {
-        const newUser = new User({
-            email: req.body.email,
-            password: req.body.password,
-            name: req.body.name,
-            emailToken: crypto.randomBytes(64).toString("hex"),
-        });
-        // console.log("Req", req.body);
-        // console.log(req.body.email, req.body.password, req.body.name);
-
-        await newUser.save();
-
-        const confirmURL = `${req.protocol}://${req.get(
-    "host"
-  )}/users/confirmEmail?token=${newUser.emailToken}`;
-
-        const message = `Confirm Your Email by clicking here : ${confirmURL}.\n`;
-
-        try {
-            await sendEmail({
-                email: newUser.email,
-                subject: "Confirm Your Email",
-                message,
-            });
-
-            res.status(200).json({
-                status: "success",
-                message: "Confirmation Mail Sent!",
-            });
-        } catch (err) {
-            console.log("INside Catch Block");
-            newUser.email = undefined;
-            newUser.token = undefined;
-            await newUser.save({ validateBeforeSave: false });
-
-            return next(
-                new AppError("There was an error sending the email. Try again later!"),
-                500
-            );
-        }
-    } catch (e) {
+    const { email, password, name } = req.body;
+    const user = await User.find({ email });
+    if (user.length > 0) {
         res.status(400).json({
             status: "error",
-            error: e
+            message: "You already have an account registered with this email",
         });
+    } else {
+        try {
+            const newUser = new User({
+                email: email,
+                password: password,
+                name: name,
+                emailToken: crypto.randomBytes(64).toString("hex"),
+            });
+            // console.log("Req", req.body);
+            // console.log(req.body.email, req.body.password, req.body.name);
+
+            await newUser.save();
+
+            const confirmURL = `${req.protocol}://${req.get(
+        "host"
+      )}/users/confirmEmail?token=${newUser.emailToken}`;
+
+            const message = `Confirm Your Email by clicking here : ${confirmURL}.\n`;
+
+            try {
+                await sendEmail({
+                    email: newUser.email,
+                    subject: "Confirm Your Email",
+                    message,
+                });
+
+                res.status(200).json({
+                    status: "success",
+                    message: "Confirmation Mail Sent!",
+                });
+            } catch (err) {
+                console.log("INside Catch Block");
+                newUser.email = undefined;
+                newUser.token = undefined;
+                await newUser.save({ validateBeforeSave: false });
+
+                return next(
+                    new AppError(
+                        "There was an error sending the email. Try again later!"
+                    ),
+                    500
+                );
+            }
+        } catch (e) {
+            res.status(400).json({
+                status: "error",
+                error: e,
+            });
+        }
     }
 };
 
