@@ -231,7 +231,7 @@ exports.githubLogin = async(req, res) => {
                     token,
                     user: { _id, loginId, name, email, photo, confirmSignup },
                 });
-                await res.redirect(`http://localhost:3000/dashboard`);
+                res.redirect(`http://localhost:3000/dashboard`);
 
             } else {
                 var password = profile.email + process.env.JWT_SECRET;
@@ -260,7 +260,7 @@ exports.githubLogin = async(req, res) => {
                         token,
                         user: { _id, loginId, name, email, photo, confirmSignup },
                     });
-                    await res.redirect(`http://localhost:3000/dashboard`);
+                    res.redirect(`http://localhost:3000/dashboard`);
                 });
             }
         }
