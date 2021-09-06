@@ -148,10 +148,10 @@ exports.googleLogin = (req, res) => {
                                         error: "Something went wrong",
                                     });
                                 }
-                                const token = jwt.sign({ _id: user._id },
+                                const token = jwt.sign({ _id: data._id },
                                     process.env.JWT_SECRET, { expiresIn: "1d" }
                                 );
-                                const { _id, name, email, photo, confirmSignup } = user;
+                                const { _id, name, email, photo, confirmSignup } = newUser;
                                 res.cookie("crewsnet", token, {
                                     httpOnly: true,
                                 });
@@ -212,16 +212,61 @@ exports.githubLogin = async(req, res) => {
         });
     }
 
-    const user = await getGithubUser(code);
-    await console.log(user);
-    const token = await jwt.sign(user, process.env.JWT_SECRET, {
-        expiresIn: "1d",
+    const profile = await getGithubUser(code);
+    User.findOne({ loginId: profile.id }).exec((err, user) => {
+        if (err) {
+            return res.status(400).json({
+                error: "Something went wrong",
+            });
+        } else {
+            if (user) {
+                const token = jwt.sign({ _id: user._id },
+                    process.env.JWT_SECRET, { expiresIn: "1d" }
+                );
+                const { _id, loginId, name, email, photo, confirmSignup } = user;
+                res.cookie("crewsnet", token, {
+                    httpOnly: true,
+                });
+                res.json({
+                    token,
+                    user: { _id, loginId, name, email, photo, confirmSignup },
+                });
+                res.redirect(`http://localhost:3000/dashboard`);
+
+            } else {
+                var password = profile.email + process.env.JWT_SECRET;
+                var newUser = new User({
+                    loginId: profile.id,
+                    name: profile.name,
+                    email: profile.email,
+                    password,
+                    confirmSignup: true,
+                    photo: profile.avatar_url,
+                });
+                newUser.save((err, data) => {
+                    if (err) {
+                        return res.status(400).json({
+                            error: "Something went wrong",
+                        });
+                    }
+                    const token = jwt.sign({ _id: data._id },
+                        process.env.JWT_SECRET, { expiresIn: "1d" }
+                    );
+                    const { _id, loginId, name, email, photo, confirmSignup } = newUser;
+                    res.cookie("crewsnet", token, {
+                        httpOnly: true,
+                    });
+                    res.json({
+                        token,
+                        user: { _id, loginId, name, email, photo, confirmSignup },
+                    });
+                    res.redirect(`http://localhost:3000/dashboard`);
+                });
+            }
+        }
     });
 
-    await res.cookie("crewsnet", token, {});
-
     // res.json({ user, token })
-    await res.redirect(`http://localhost:3000/dashboard`);
 };
 
 exports.githubLoginUser = async(req, res) => {
