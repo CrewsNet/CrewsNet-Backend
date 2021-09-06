@@ -4,20 +4,20 @@ const router = express.Router();
 /* ---------------------------- Function Imports ---------------------------- */
 
 const {
-  dashBoard,
-  signup,
-  login,
-  googleLogin,
-  githubLogin,
-  githubLoginUser,
-  authPass,
-  confirmEmail,
-  forgotPassword,
-  resetPassword,
-  getSignup,
+    dashBoard,
+    signup,
+    login,
+    googleLogin,
+    githubLogin,
+    githubLoginUser,
+    authPass,
+    confirmEmail,
+    forgotPassword,
+    resetPassword,
+    getSignup,
 
-  getLogin,
-  getToken,
+    getLogin,
+    getToken,
 } = require("../../../controllers/Users/authController");
 // const authController = require('../');
 const { ensureAuth, ensureGuest } = require("../../../middleware/googleAuth");
@@ -35,7 +35,7 @@ router.get("/auth/githubuser", githubLoginUser);
 /* -------------------------- Forget PassWord Routes ------------------------- */
 
 router.post("/forgotPassword", forgotPassword);
-router.patch("/resetPassword", resetPassword);
+router.patch("/resetPassword/:token", resetPassword);
 
 /* ------------------------- Token Conversion Route ------------------------- */
 

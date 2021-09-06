@@ -259,12 +259,6 @@ exports.login = catchAsync(async(req, res, next) => {
 
     createSendToken(user, 200, res);
 
-    //   const token = signToken(user._id);
-
-    // res.status(200).json({
-    //   status: "success",
-    //   token,
-    // });
 });
 
 /* ----------------------------- DashBoard Route ---------------------------- */
@@ -338,7 +332,7 @@ exports.forgotPassword = catchAsync(async(req, res, next) => {
     // 3) Send it to user's email
     const resetURL = `${req.protocol}://${req.get(
     "host"
-  )}/api/users/resetPassword/${resetToken}`;
+  )}/users/resetPassword/${resetToken}`;
 
     const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
 
@@ -436,6 +430,6 @@ exports.getToken = async(req, res) => {
     }
     const id = currentUser._id;
     res.status(200).json({
-        id: id,
+        id,
     });
 };
