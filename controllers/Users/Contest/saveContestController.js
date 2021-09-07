@@ -4,6 +4,13 @@ exports.saveContest = (req, res) => {
 
   console.log(user)
 
+  user.savedContest.map((contest) => {
+    const check = (contest.url == url && JSON.stringify(contest.start_time) == JSON.stringify(start_time))
+    if (check == true) {
+      return res.status(400).json({ message: "This contest already exists"})
+    }
+  })
+
   user.savedContest.push({
     name,
     url,
@@ -14,7 +21,6 @@ exports.saveContest = (req, res) => {
     in_24_hours,
     status,
   })
-  user.savedContest = [...new Set(user.savedContest)]
 
   user.save()
 
