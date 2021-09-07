@@ -115,13 +115,13 @@ exports.googleLogin = (req, res) => {
         } else {
           if (user) {
             const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
-            const { _id, name, email, photo, confirmSignup } = user
+            const { _id, name, email, photo, confirmSignup, savedContest } = user
             res.cookie("crewsnet", token, {
               httpOnly: true,
             })
             res.json({
               token,
-              user: { _id, name, email, photo, confirmSignup },
+              user: { _id, name, email, photo, confirmSignup , savedContest },
             })
           } else {
             var password = email + process.env.JWT_SECRET
@@ -139,13 +139,13 @@ exports.googleLogin = (req, res) => {
                 })
               }
               const token = jwt.sign({ _id: data._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
-              const { _id, name, email, photo, confirmSignup } = newUser
+              const { _id, name, email, photo, confirmSignup, savedContest } = newUser
               res.cookie("crewsnet", token, {
                 httpOnly: true,
               })
               res.json({
                 token,
-                user: { _id, name, email, photo, confirmSignup },
+                user: { _id, name, email, photo, confirmSignup, savedContest },
               })
             })
           }
