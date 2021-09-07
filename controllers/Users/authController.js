@@ -114,7 +114,7 @@ exports.googleLogin = (req, res) => {
           })
         } else {
           if (user) {
-            const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
             const { _id, name, email, photo, confirmSignup, savedContest } = user
             res.cookie("crewsnet", token, {
               httpOnly: true,
@@ -138,7 +138,7 @@ exports.googleLogin = (req, res) => {
                   error: "Something went wrong",
                 })
               }
-              const token = jwt.sign({ _id: data._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
+              const token = jwt.sign({ id: data._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
               const { _id, name, email, photo, confirmSignup, savedContest } = newUser
               res.cookie("crewsnet", token, {
                 httpOnly: true,
