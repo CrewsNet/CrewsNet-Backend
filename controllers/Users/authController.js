@@ -220,7 +220,7 @@ exports.githubLogin = async (req, res) => {
       if (user) {
         const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
         const { _id, loginId, name, email, photo, confirmSignup } = user
-        res.cookie("crewsnet", token)
+        res.cookie("crewsnet", token, { domain: "https://crewsnet.netlify.app/" })
         // res.json({
         //   token,
         //   user: { _id, loginId, name, email, photo, confirmSignup },
@@ -245,7 +245,9 @@ exports.githubLogin = async (req, res) => {
           }
           const token = jwt.sign({ _id: data._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
           const { _id, loginId, name, email, photo, confirmSignup } = newUser
-          res.cookie("crewsnet", token, {})
+          res.cookie("crewsnet", token, {
+            domain: "https://crewsnet.netlify.app/",
+          })
           //   res.json({
           //     token,
           //     user: { _id, loginId, name, email, photo, confirmSignup },
