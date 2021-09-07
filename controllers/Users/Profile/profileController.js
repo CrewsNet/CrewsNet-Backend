@@ -14,7 +14,7 @@ exports.getInfo = (req, res) => {
 
   res.status(200).json({
     message: "Success",
-    data: user.name,
+    name: user.name,
     email: user.email,
   });
 };
