@@ -1,3 +1,5 @@
+var _ = require("lodash");
+
 exports.saveContest = (req, res) => {
   const user = req.user;
   const {
@@ -42,6 +44,19 @@ exports.saveContest = (req, res) => {
 
 exports.getSavedContest = (req, res) => {
   const user = req.user;
+
+  // const ar = _.sortBy(user.savedContest, "start_time");
+  // console.log(user.savedContest);
+
+  user.savedContest.sort(function (a, b) {
+    var keyA = new Date(a.start_time),
+      keyB = new Date(b.start_time);
+    // Compare the 2 dates
+    if (keyA < keyB) return -1;
+    if (keyA > keyB) return 1;
+    return 0;
+  });
+
   const contest = user.savedContest;
   res.status(200).json({
     message: "Success",
