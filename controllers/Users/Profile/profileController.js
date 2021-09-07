@@ -16,5 +16,6 @@ exports.getInfo = (req, res) => {
     message: "Success",
     name: user.name,
     email: user.email,
+    photo: user.photo,
   });
 };
