@@ -225,7 +225,7 @@ exports.githubLogin = async (req, res) => {
         //   token,
         //   user: { _id, loginId, name, email, photo, confirmSignup },
         // })
-        res.redirect(`http://localhost:3000/dashboard`)
+        res.redirect(`https://crewsnet.netlify.app/dashboard`)
       } else {
         var password = profile.email + process.env.JWT_SECRET
         var newUser = new User({
@@ -250,7 +250,7 @@ exports.githubLogin = async (req, res) => {
           //     token,
           //     user: { _id, loginId, name, email, photo, confirmSignup },
           //   })
-          res.redirect(`http://localhost:3000/dashboard`)
+          res.redirect(`https://crewsnet.netlify.app/dashboard`)
         })
       }
     }
